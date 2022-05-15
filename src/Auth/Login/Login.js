@@ -1,18 +1,52 @@
-import React from "react";
-import { useSignInWithGoogle } from "react-firebase-hooks/auth";
+import React, { useEffect } from "react";
+import { useSendPasswordResetEmail, useSignInWithEmailAndPassword, useSignInWithGoogle } from "react-firebase-hooks/auth";
 import auth from "../../firebase.init";
 import { useForm } from "react-hook-form";
+import Loading from "../../Pages/Shared/Loading/Loading";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { async } from "@firebase/util";
 
 const Login = () => {
-  const [signInWithGoogle, user, loading, error] = useSignInWithGoogle(auth);
+  const [signInWithGoogle, gUser, gLoading, gError] = useSignInWithGoogle(auth);
+  const [signInWithEmailAndPassword,user,loading, error,] = useSignInWithEmailAndPassword(auth);
+  const [sendPasswordResetEmail, sending, ResetError] = useSendPasswordResetEmail(auth);
   const { register,formState: { errors },handleSubmit} = useForm();
 
-  if (user) {
-    console.log(user);
-  }
+    let signInError;
+    const navigate = useNavigate();
+    const location = useLocation();
+    let from = location.state?.from?.pathname || "/";
+
+    useEffect(()=> {
+      if ( user || gUser) {
+        navigate(from, {replace: true});
+      }
+    },[user, gUser, from, navigate])
+
+   if(  loading || gLoading){
+     return <Loading></Loading>
+   }
+
+   if(error || gError){
+     signInError = <p className="text-red-500"><small> {error?.message || gError?.message}</small></p>
+   }
+
+ 
+
   const onSubmit = data =>{
-    console.log(data)
+    console.log(data);
+    signInWithEmailAndPassword(data.email, data.password);
   };
+  const resetPassword =  async(e) =>{
+    const email= e.target.value
+    if(email){
+      await sendPasswordResetEmail(email);
+      alert('Sent email');
+    }
+    else{
+      alert('please enter your email');
+    }
+  }
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -21,14 +55,14 @@ const Login = () => {
           <h2 className="text-center text-2xl font-bold">Login</h2>
           <form onSubmit={handleSubmit(onSubmit)}>
                 {/* //EMail  */}
-          <div class="form-control w-full max-w-xs">
-      <label class="label">
-        <span class="label-text">Email</span>
+          <div className="form-control w-full max-w-xs">
+      <label className="label">
+        <span className="label-text">Email</span>
       </label>
 
       <input type="email" 
       placeholder="Your Email"
-       class="input input-bordered w-full max-w-xs" 
+       className="input input-bordered w-full max-w-xs" 
        {...register("email", {
          required:{
            value:true,
@@ -40,21 +74,22 @@ const Login = () => {
         }
       })}
        />
-        <label class="label">
+        <label className="label">
         {errors.email?.type === "required" && <span className="label-text-alt text-red-500"> {errors.email.message} </span>}
         {errors.email?.type === "pattern" && <span className="label-text-alt text-red-500"> {errors.email.message} </span>}
         </label>
          </div>
+         
 
          {/* password  */}
-         <div class="form-control w-full max-w-xs">
-      <label class="label">
-        <span class="label-text">Password</span>
+         <div className="form-control w-full max-w-xs">
+      <label className="label">
+        <span className="label-text">Password</span>
       </label>
 
       <input type="password" 
       placeholder="Your Password"
-       class="input input-bordered w-full max-w-xs" 
+       className="input input-bordered w-full max-w-xs" 
        {...register("password", {
          required:{
            value:true,
@@ -66,15 +101,21 @@ const Login = () => {
         }
       })}
        />
-        <label class="label">
+        <label className="label">
         {errors.password?.type === "required" && <span className="label-text-alt text-red-500"> {errors.password.message} </span>}
         {errors.password?.type === "minLength" && <span className="label-text-alt text-red-500"> {errors.password.message} </span>}
         </label>
          </div>
-        
-
+        {/* password end  */}
+        <label class="label mt-0 ">
+        <span class="label-text-alt text-center" onClick={resetPassword}>Forgot Password?</span>
+    
+      </label>
+          {signInError}
             <input className="btn w-full max-w-xs text-white" type="submit" value='Login' />
           </form>
+
+          <p className="text-center"> <small> New to Doctors Portal? <Link className="text-primary" to='/signup'>Create New Account</Link> </small> </p>
           <div className="divider">OR</div>
           <button
             onClick={() => signInWithGoogle()}
