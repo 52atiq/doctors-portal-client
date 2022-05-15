@@ -5,12 +5,14 @@ import { useForm } from "react-hook-form";
 import Loading from "../../Pages/Shared/Loading/Loading";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { async } from "@firebase/util";
+import useToken from '../../hooks/useToken'
 
 const Login = () => {
   const [signInWithGoogle, gUser, gLoading, gError] = useSignInWithGoogle(auth);
   const [signInWithEmailAndPassword,user,loading, error,] = useSignInWithEmailAndPassword(auth);
   const [sendPasswordResetEmail, sending, ResetError] = useSendPasswordResetEmail(auth);
   const { register,formState: { errors },handleSubmit} = useForm();
+  const [token] = useToken(user ||gUser)
 
     let signInError;
     const navigate = useNavigate();
@@ -18,10 +20,11 @@ const Login = () => {
     let from = location.state?.from?.pathname || "/";
 
     useEffect(()=> {
-      if ( user || gUser) {
+      if ( token) {
         navigate(from, {replace: true});
       }
-    },[user, gUser, from, navigate])
+    },[token, from, navigate])
+
 
    if(  loading || gLoading){
      return <Loading></Loading>
@@ -34,9 +37,9 @@ const Login = () => {
  
 
   const onSubmit = data =>{
-    console.log(data);
     signInWithEmailAndPassword(data.email, data.password);
   };
+
   const resetPassword =  async(e) =>{
     const email= e.target.value
     if(email){

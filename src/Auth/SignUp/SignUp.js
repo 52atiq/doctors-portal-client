@@ -4,18 +4,15 @@ import auth from "../../firebase.init";
 import { useForm } from "react-hook-form";
 import Loading from "../../Pages/Shared/Loading/Loading";
 import { Link, useNavigate } from "react-router-dom";
+import useToken from '../../hooks/useToken';
+
 
 const SignUp = () => {
     const [signInWithGoogle, gUser, gLoading, gError] = useSignInWithGoogle(auth);
-    const [
-        createUserWithEmailAndPassword,
-        user,
-        loading,
-        error,
-      ] = useCreateUserWithEmailAndPassword(auth);
+    const [createUserWithEmailAndPassword,user, loading, error,] = useCreateUserWithEmailAndPassword(auth);
     const { register,formState: { errors },handleSubmit} = useForm();
     const [updateProfile, updating, updateError] = useUpdateProfile(auth);
-  
+    const [token] = useToken(user || gUser );
     const navigate = useNavigate();
 
       let signInError;
@@ -29,15 +26,19 @@ const SignUp = () => {
        signInError = <p className="text-red-500"><small> {error?.message || gError?.message || updateError?.message}</small></p>
      }
   
-    if ( user || gUser ) {
-      console.log(user, gUser);
+    // if ( user || gUser ) {
+    //   console.log(user, gUser);
+    //     // navigate('/appointment');
+    // }
+    if(token){
+      navigate('/appointment')
     }
+
     const onSubmit = async data =>{
-     
     await  createUserWithEmailAndPassword(data.email, data.password);
       await updateProfile({ displayName: data.name });
       console.log('update done');
-      navigate('/appointment');
+      // navigate('/appointment');
     };
 
     return (
