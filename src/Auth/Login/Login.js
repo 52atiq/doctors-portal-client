@@ -12,7 +12,7 @@ const Login = () => {
   const [signInWithEmailAndPassword,user,loading, error,] = useSignInWithEmailAndPassword(auth);
   const [sendPasswordResetEmail, sending, ResetError] = useSendPasswordResetEmail(auth);
   const { register,formState: { errors },handleSubmit} = useForm();
-  const [token] = useToken(user ||gUser)
+  const [token] = useToken(user || gUser)
 
     let signInError;
     const navigate = useNavigate();
