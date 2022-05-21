@@ -4,22 +4,7 @@ import { toast } from "react-toastify";
 const DoctorRow = ({ doctor, index , refetch, setDeletingDoctor}) => {
   const { name, specialty ,img, email} = doctor;
 
-  // const handleDelete = (email) =>{
-  //   fetch(`http://localhost:5000/doctor/${email}`, {
-  //       method: 'DELETE',
-  //       headers: {
-  //           authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-  //         },
-  //   })
-  //   .then(res =>res.json())
-  //   .then(data => {
-  //       console.log(data);
-  //       if(data.deletedCount){
-  //           toast.success(`Doctor: ${name} is deleted`)
-  //           refetch()
-  //       }
-  //   })
-  // }
+  
 
   return (
     <tr>
